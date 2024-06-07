@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-diary',
@@ -8,5 +9,15 @@ import { Component } from '@angular/core';
   styleUrl: './diary.component.css'
 })
 export class DiaryComponent {
+  toggleButtonValue = 23
+  testFunction() {
+
+    console.log(this.toggleButtonValue)
+  }
+
+
+  ngOnInit(){
+    this.testFunction()
+  }
 
 }

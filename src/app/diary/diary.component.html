@@ -7,15 +7,15 @@
             <tr>
                 <th>Date</th>
                 <th>Entry</th>
-                <th *ngIf="isAuthenticated">Action</th>
+                <th>Action</th>
 
             </tr>
             </thead>
             <tbody>
-                <tr *ngFor='let diary of diaryEntries; let i = index'>
-                    <td>{{diary.date}}</td>
-                    <td>{{diary.entry}}</td>
-                    <td *ngIf="isAuthenticated">
+                <tr>
+                    <td>testing 123</td>
+                    <td>testing 234</td>
+                    <td >
                         <!-- <button class="btn btn-primary" (click)="onEdit(diary.id)">Edit</button>   
                         <button class="btn btn-danger" (click)='onDelete(diary.id)'>Delete</button> -->
                     </td>
