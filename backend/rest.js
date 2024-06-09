@@ -7,13 +7,20 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 const app = express();
-mongoose.connect("insert here")    
+mongoose.connect("insert here")
     .then(() => {
         console.log('Connected to MongoDB')
     })
     .catch(() => {
         console.log('Error connecting to MongoDB');
     })
+
+diaryEntries = [
+    { id: 1, date: "July 1st", entry: "Entry 1" },
+    { id: 2, date: "July 2nd", entry: "Entry 2" },
+    { id: 3, date: "July 3rd", entry: "Entry 3" },
+
+]
 
 app.use(bodyParser.json());
 app.use((req, res, next) => {
@@ -23,40 +30,45 @@ app.use((req, res, next) => {
     next();
 })
 
+app.get('/diary-entries', (req, res, next) => {
+    res.json({ "diaryEntries": diaryEntries })
+})
+
+
 app.delete('/remove-entry/:id', (req, res) => {
-    DiaryEntryModel.deleteOne({_id: req.params.id})
-    .then(() => {
-        res.status(200).json({
-            message: 'Post Deleted'
+    DiaryEntryModel.deleteOne({ _id: req.params.id })
+        .then(() => {
+            res.status(200).json({
+                message: 'Post Deleted'
+            })
         })
-    })
 })
 
 app.put('/update-entry/:id', (req, res) => {
-    const updatedEntry = new DiaryEntryModel({_id: req.body.id, date: req.body.date, entry: req.body.entry})
-    DiaryEntryModel.updateOne({_id: req.body.id}, updatedEntry)
+    const updatedEntry = new DiaryEntryModel({ _id: req.body.id, date: req.body.date, entry: req.body.entry })
+    DiaryEntryModel.updateOne({ _id: req.body.id }, updatedEntry)
         .then(() => {
             res.status(200).json({
                 message: 'Update completed'
-            })    
+            })
         })
 })
 
 app.post('/add-entry', (req, res, next) => {
-   
-    try{
+
+    try {
         const token = req.headers.authorization;
         jwt.verify(token, "secret_string")
         next();
     }
-    catch(err){
+    catch (err) {
         res.status(401).json({
-            message:"Error with Authentication token"
+            message: "Error with Authentication token"
         })
     }
-    
-}, (req,res) => {
-    const diaryEntry = new DiaryEntryModel({date: req.body.date, entry: req.body.entry});
+
+}, (req, res) => {
+    const diaryEntry = new DiaryEntryModel({ date: req.body.date, entry: req.body.entry });
     diaryEntry.save()
         .then(() => {
             res.status(200).json({
@@ -65,17 +77,17 @@ app.post('/add-entry', (req, res, next) => {
         })
 })
 
-app.get('/diary-entries',(req, res, next) => {
+app.get('/diary-entries', (req, res, next) => {
     DiaryEntryModel.find()
-    .then((data) => {
-        res.json({'diaryEntries': data});
-    })
-    .catch(() => {
-        console.log('Error fetching entries')
-    })
+        .then((data) => {
+            res.json({ 'diaryEntries': data });
+        })
+        .catch(() => {
+            console.log('Error fetching entries')
+        })
 })
 
-app.post('/sign-up', (req,res) => {
+app.post('/sign-up', (req, res) => {
 
     bcrypt.hash(req.body.password, 10)
         .then(hash => {
@@ -85,27 +97,27 @@ app.post('/sign-up', (req,res) => {
             })
 
             userModel.save()
-            .then(result => {
-                res.status(201).json({
-                    message: 'User created',
-                    result: result
+                .then(result => {
+                    res.status(201).json({
+                        message: 'User created',
+                        result: result
+                    })
                 })
-            })
-            .catch(err => {
-                res.status(500).json({
-                    error: err
+                .catch(err => {
+                    res.status(500).json({
+                        error: err
+                    })
                 })
-            })
         })
 })
 
-app.post('/login', (req,res) => {
+app.post('/login', (req, res) => {
 
     let userFound;
 
-    UserModel.findOne({username: req.body.username})
+    UserModel.findOne({ username: req.body.username })
         .then(user => {
-            if(!user){
+            if (!user) {
                 return res.status(401).json({
                     message: 'User not found'
                 })
@@ -113,23 +125,23 @@ app.post('/login', (req,res) => {
             userFound = user
             return bcrypt.compare(req.body.password, user.password)
         })
-    .then(result => {
-        if(!result){
-            return res.status(401).json({
-                message: 'Password is incorrect'
-            })
-        }
+        .then(result => {
+            if (!result) {
+                return res.status(401).json({
+                    message: 'Password is incorrect'
+                })
+            }
 
-        const token = jwt.sign({username: userFound.username, userId: userFound._id}, "secret_string", {expiresIn:"1h"})
-        return res.status(200).json({
-            token: token
+            const token = jwt.sign({ username: userFound.username, userId: userFound._id }, "secret_string", { expiresIn: "1h" })
+            return res.status(200).json({
+                token: token
+            })
         })
-    })
-    .catch(err => {
-        return res.status(401).json({
-            message: 'Error with authentication'
+        .catch(err => {
+            return res.status(401).json({
+                message: 'Error with authentication'
+            })
         })
-    })
 })
 
 module.exports = app;
